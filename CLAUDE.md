@@ -42,6 +42,7 @@ docs/의 PRD·screens·Design·tokens와 reference/links.md를 읽어, 4개 화�
 ## 3. 자동 게이트 (`node harness/scripts/check-all.mjs [--stage N]`)
 G1 화면 수 · G2 토큰 동기화 · G3 토큰 밖 값 · G4★ 가격(규칙 3) · G5★ 속도(규칙 5) · G10a /complete에 /apply 0번 · G11 저장 위치 · G13 금지어 · G14 원본 보호 · G15 build·lint
 (정확한 기준은 harness/scripts/gates/*.mjs 주석과 01-context.md)
+- G3 예외는 1개뿐: app/globals.css의 `--layout-width: 390px;` 정의 1번 (harness/scripts/lib/token-rules.mjs). 화면 코드에서 390 · [ ] 임의 값은 그대로 위반.
 
 ## 4. 실패와 복귀
 - G1 → 2 / G2 → 3 / G3·G4·G5·G10a·G11·G13·G15 → 4 (데이터 원인이면 4-1, 화면 원인이면 4-2) / G14 → 해당 단계
@@ -62,11 +63,13 @@ G1 화면 수 · G2 토큰 동기화 · G3 토큰 밖 값 · G4★ 가격(규칙
 3. 전부 O면 `stage.mjs approve` 후 마지막 커밋. X가 있으면 `stage.mjs fail 5 --back 4-2 --human --reason "..."`으로 4단계로 (자동 복귀 횟수에 세지 않음).
 
 ## 6. 커밋과 이어 하기
-- 브랜치는 main 하나. 새 브랜치·worktree·push 금지.
+- 브랜치는 main 하나. 새 브랜치·worktree 금지.
+- push는 원격 저장소 origin(각자 연결한 내 GitHub 저장소)의 main으로만, `git push origin main`만 허용한다. 강제 push 금지. 에이전트는 push하지 않고, 메인 대화가 사용자가 요청할 때만 한다.
 - 단계 게이트가 통과할 때마다 메인 대화가 커밋 1개: `harness: <단계> <이름> 통과`
 - "이어서 해줘": harness/state.json과 마지막 커밋을 읽고(`node harness/scripts/stage.mjs status`), 통과하지 못한 첫 단계부터 시작한다.
 
 ## 7. 훅이 막는 것 (.claude/settings.json)
+- `git push origin main` 말고의 push, 강제 push, 새 브랜치, worktree, reset --hard, git clean
 - 현재 단계의 편집 범위 밖 쓰기 (harness/state.json의 단계 기준)
 - docs/, reference/, .claude/agents/page-splitter.md, .claude/skills/code-comments/ 쓰기
 - app/tokens.css 직접 수정 (3단계 스크립트만)
